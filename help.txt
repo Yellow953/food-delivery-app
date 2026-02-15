@@ -1,0 +1,3 @@
+// Seed runs automatically when the app loads (Home / Restaurants tabs).
+// To clear and re-seed Firestore, run the app with:
+SEED_FIRESTORE=force flutter run

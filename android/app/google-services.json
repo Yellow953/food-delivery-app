@@ -1,0 +1,82 @@
+{
+  "project_info": {
+    "project_number": "341474669286",
+    "project_id": "food-delivery-app-9536c",
+    "storage_bucket": "food-delivery-app-9536c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:341474669286:android:c979df8081ee419c9c0127",
+        "android_client_info": {
+          "package_name": "com.example.deliveryApp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "341474669286-7883bntidq7m95q3d4gjp7agmp5ihpof.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCBAv7gniaE3QQ22l8-3_W8T8eI2gb9lGQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "341474669286-7883bntidq7m95q3d4gjp7agmp5ihpof.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "341474669286-lmld180kl6un7fvb0f12mo5r440gnhbn.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.deliveryApp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:341474669286:android:8b94eb98d8b5df379c0127",
+        "android_client_info": {
+          "package_name": "com.example.delivery_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "341474669286-7883bntidq7m95q3d4gjp7agmp5ihpof.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCBAv7gniaE3QQ22l8-3_W8T8eI2gb9lGQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "341474669286-7883bntidq7m95q3d4gjp7agmp5ihpof.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "341474669286-lmld180kl6un7fvb0f12mo5r440gnhbn.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.deliveryApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
