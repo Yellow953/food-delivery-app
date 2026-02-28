@@ -26,23 +26,26 @@ class RestaurantMenuView extends GetView<RestaurantMenuController> {
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            expandedHeight: 200,
+            expandedHeight: 260,
             pinned: true,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back_rounded),
+            backgroundColor: colorScheme.surface,
+            surfaceTintColor: Colors.transparent,
+            title: Text(
+              restaurant.name,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            leading: _CircleNavButton(
+              icon: Icons.arrow_back_rounded,
               onPressed: () => Get.back<void>(),
             ),
             actions: const [
               CartIconButton(),
             ],
             flexibleSpace: FlexibleSpaceBar(
-              title: Text(
-                restaurant.name,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  shadows: [Shadow(color: Colors.black45, blurRadius: 8)],
-                ),
-              ),
+              collapseMode: CollapseMode.parallax,
+              titlePadding: EdgeInsets.zero,
               background: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -64,48 +67,61 @@ class RestaurantMenuView extends GetView<RestaurantMenuController> {
                       ),
                     ),
                   ),
-                  DecoratedBox(
+                  const DecoratedBox(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Colors.black.withOpacity(0.6),
-                        ],
+                        colors: [Colors.transparent, Colors.black87],
+                        stops: [0.35, 1.0],
                       ),
                     ),
                   ),
-                ],
-              ),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.star_rounded,
-                    size: 20,
-                    color: colorScheme.secondary,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    restaurant.rating,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Text(
-                      restaurant.cuisine,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                  Positioned(
+                    left: 20,
+                    right: 20,
+                    bottom: 20,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          restaurant.name,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            shadows: [Shadow(color: Colors.black54, blurRadius: 4)],
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            const Icon(Icons.star_rounded, size: 16, color: Colors.amber),
+                            const SizedBox(width: 4),
+                            Text(
+                              restaurant.rating,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                restaurant.cuisine,
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 13,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -130,10 +146,18 @@ class RestaurantMenuView extends GetView<RestaurantMenuController> {
                         ),
                       ),
                       Expanded(
-                        child: _MenuActionChip(
-                          icon: Icons.share_rounded,
-                          label: 'Share',
-                          onTap: controller.shareRestaurant,
+                        child: Builder(
+                          builder: (ctx) => _MenuActionChip(
+                            icon: Icons.share_rounded,
+                            label: 'Share',
+                            onTap: () {
+                              final box = ctx.findRenderObject() as RenderBox?;
+                              final rect = box != null
+                                  ? box.localToGlobal(Offset.zero) & box.size
+                                  : null;
+                              controller.shareRestaurant(rect);
+                            },
+                          ),
                         ),
                       ),
                       Expanded(
@@ -379,6 +403,32 @@ class _MenuDishTile extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CircleNavButton extends StatelessWidget {
+  const _CircleNavButton({required this.icon, required this.onPressed});
+
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: Material(
+        color: Colors.black38,
+        shape: const CircleBorder(),
+        child: InkWell(
+          onTap: onPressed,
+          customBorder: const CircleBorder(),
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Icon(icon, color: Colors.white, size: 22),
           ),
         ),
       ),

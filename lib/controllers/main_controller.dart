@@ -7,6 +7,7 @@ import '../models/popular_dish_model.dart';
 import '../models/restaurant_model.dart';
 import '../services/auth_service.dart';
 import '../services/home_repository.dart';
+import 'cart_controller.dart';
 
 /// Controls main shell: bottom nav index, auth, and home data from Firestore.
 class MainController extends GetxController {
@@ -30,8 +31,8 @@ class MainController extends GetxController {
   /// Search query for search tab (restaurants + dishes).
   final Rx<String> searchQuery = ''.obs;
 
-  /// Cart item count (in-memory; placeholder until cart screen exists).
-  final RxInt cartItemCount = 0.obs;
+  /// Cart item count — reads from the permanent CartController.
+  int get cartItemCount => Get.find<CartController>().totalItemCount;
 
   String? get userEmail => _authService.currentUser.value?.email;
 
@@ -72,10 +73,6 @@ class MainController extends GetxController {
   }
 
   bool isFavoriteDish(String dishId) => favoriteDishIds.contains(dishId);
-
-  void addToCart() {
-    cartItemCount.value = cartItemCount.value + 1;
-  }
 
   @override
   void onReady() {

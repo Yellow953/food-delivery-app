@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../controllers/main_controller.dart';
+import '../controllers/cart_controller.dart';
 
 /// Cart icon with optional badge (count). Use in app bars / headers.
 class CartIconButton extends StatelessWidget {
@@ -19,8 +19,8 @@ class CartIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final controller = Get.find<MainController>();
-      final count = controller.cartItemCount.value;
+      final cart = Get.find<CartController>();
+      final count = cart.items.fold(0, (s, i) => s + i.quantity);
       final effectiveColor = color ?? Theme.of(context).colorScheme.onSurface;
 
       return IconButton(

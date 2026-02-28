@@ -1,5 +1,6 @@
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
-import 'package:share_plus/share_plus.dart';
+import 'package:share_plus/share_plus.dart' show Share;
 import 'package:url_launcher/url_launcher.dart';
 
 import '../models/popular_dish_model.dart';
@@ -55,12 +56,14 @@ class RestaurantMenuController extends GetxController {
   }
 
   /// Share restaurant name and text.
-  Future<void> shareRestaurant() async {
+  /// [sharePositionOrigin] is required on iOS to anchor the share sheet popover.
+  Future<void> shareRestaurant([Rect? sharePositionOrigin]) async {
     final r = _restaurant;
     if (r == null) return;
     await Share.share(
       'Check out ${r.name} - ${r.cuisine}. ${r.address ?? ''}',
       subject: r.name,
+      sharePositionOrigin: sharePositionOrigin,
     );
   }
 

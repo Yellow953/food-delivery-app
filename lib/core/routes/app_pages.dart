@@ -11,6 +11,11 @@ import '../../controllers/forgot_password_controller.dart';
 import '../../controllers/main_controller.dart';
 import '../../controllers/product_detail_controller.dart';
 import '../../controllers/restaurant_menu_controller.dart';
+import '../../controllers/edit_profile_controller.dart';
+import '../../controllers/notifications_controller.dart';
+import '../../controllers/settings_controller.dart';
+import '../../controllers/checkout_controller.dart';
+import '../../controllers/orders_controller.dart';
 import '../../views/splash/splash_view.dart';
 import '../../views/auth/auth_view.dart';
 import '../../views/auth/signup_view.dart';
@@ -19,6 +24,11 @@ import '../../views/main_nav/main_view.dart';
 import '../../views/product_detail/product_detail_view.dart';
 import '../../views/restaurant_menu/restaurant_menu_view.dart';
 import '../../views/checkout/checkout_view.dart';
+import '../../views/profile/edit_profile_view.dart';
+import '../../views/profile/addresses_view.dart';
+import '../../views/profile/notifications_view.dart';
+import '../../views/profile/settings_view.dart';
+import '../../views/profile/location_picker_view.dart';
 
 import 'app_routes.dart';
 
@@ -81,6 +91,12 @@ class AppPages {
             Firebase.apps.isNotEmpty ? Get.find<HomeRepository>() : null,
           ),
         );
+        Get.lazyPut<OrdersController>(
+          () => OrdersController(
+            Get.find<AuthService>(),
+            Firebase.apps.isNotEmpty ? FirebaseFirestore.instance : null,
+          ),
+        );
       }),
     ),
     GetPage<dynamic>(
@@ -104,6 +120,47 @@ class AppPages {
     GetPage<dynamic>(
       name: AppRoutes.checkout,
       page: CheckoutView.new,
+      binding: BindingsBuilder<void>(() {
+        Get.lazyPut<CheckoutController>(
+          () => CheckoutController(
+            Get.find<AuthService>(),
+            Firebase.apps.isNotEmpty ? FirebaseFirestore.instance : null,
+          ),
+        );
+      }),
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.editProfile,
+      page: EditProfileView.new,
+      binding: BindingsBuilder<void>(() {
+        Get.lazyPut<EditProfileController>(
+          () => EditProfileController(Get.find<AuthService>()),
+        );
+      }),
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.addresses,
+      page: AddressesView.new,
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.notifications,
+      page: NotificationsView.new,
+      binding: BindingsBuilder<void>(() {
+        Get.lazyPut<NotificationsController>(
+          () => NotificationsController(),
+        );
+      }),
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.settings,
+      page: SettingsView.new,
+      binding: BindingsBuilder<void>(() {
+        Get.lazyPut<SettingsController>(() => SettingsController());
+      }),
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.locationPicker,
+      page: LocationPickerView.new,
     ),
   ];
 }

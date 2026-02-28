@@ -1,7 +1,9 @@
 import 'package:get/get.dart';
 
 import '../core/routes/app_routes.dart';
+import '../models/cart_item_model.dart';
 import '../models/popular_dish_model.dart';
+import 'cart_controller.dart';
 import 'main_controller.dart';
 
 /// Shows a single dish; receives [PopularDishModel] via Get.arguments.
@@ -79,7 +81,16 @@ class ProductDetailController extends GetxController {
   bool isAddonSelected(int index) => selectedAddonIndices.contains(index);
 
   void addToCart() {
-    _mainController.addToCart();
+    if (_dish == null) return;
+    final cart = Get.find<CartController>();
+    cart.addItem(CartItem(
+      dish: _dish!,
+      sizeName: sizeLabels[selectedSizeIndex],
+      price: variantTotal,
+      addons: selectedAddonIndices
+          .map((i) => addonLabels[i])
+          .toList(),
+    ));
     Get.offNamed<void>(AppRoutes.checkout);
   }
 }

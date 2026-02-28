@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../controllers/main_controller.dart';
+import '../../core/routes/app_routes.dart';
 
 class ProfileTab extends GetView<MainController> {
   const ProfileTab({super.key});
@@ -120,19 +121,25 @@ class ProfileTab extends GetView<MainController> {
                     _ProfileTile(
                       icon: Icons.person_outline_rounded,
                       title: 'Edit profile',
-                      onTap: () {},
+                      onTap: () => Get.toNamed<void>(AppRoutes.editProfile),
                     ),
                     Divider(height: 1, color: colorScheme.outline.withOpacity(0.5)),
                     _ProfileTile(
                       icon: Icons.location_on_outlined,
                       title: 'Addresses',
-                      onTap: () {},
+                      onTap: () => Get.toNamed<void>(AppRoutes.addresses),
                     ),
                     Divider(height: 1, color: colorScheme.outline.withOpacity(0.5)),
                     _ProfileTile(
                       icon: Icons.notifications_outlined,
                       title: 'Notifications',
-                      onTap: () {},
+                      onTap: () => Get.toNamed<void>(AppRoutes.notifications),
+                    ),
+                    Divider(height: 1, color: colorScheme.outline.withOpacity(0.5)),
+                    _ProfileTile(
+                      icon: Icons.settings_outlined,
+                      title: 'Settings',
+                      onTap: () => Get.toNamed<void>(AppRoutes.settings),
                     ),
                   ],
                 ),
