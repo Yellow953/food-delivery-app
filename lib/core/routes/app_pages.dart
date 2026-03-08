@@ -12,10 +12,14 @@ import '../../controllers/main_controller.dart';
 import '../../controllers/product_detail_controller.dart';
 import '../../controllers/restaurant_menu_controller.dart';
 import '../../controllers/edit_profile_controller.dart';
+import '../../controllers/change_password_controller.dart';
+import '../../views/profile/change_password_view.dart';
 import '../../controllers/notifications_controller.dart';
 import '../../controllers/settings_controller.dart';
 import '../../controllers/checkout_controller.dart';
 import '../../controllers/orders_controller.dart';
+import '../../controllers/seller_orders_controller.dart';
+import '../../controllers/driver_orders_controller.dart';
 import '../../views/splash/splash_view.dart';
 import '../../views/auth/auth_view.dart';
 import '../../views/auth/signup_view.dart';
@@ -29,6 +33,17 @@ import '../../views/profile/addresses_view.dart';
 import '../../views/profile/notifications_view.dart';
 import '../../views/profile/settings_view.dart';
 import '../../views/profile/location_picker_view.dart';
+import '../../views/auth/seller_setup_view.dart';
+import '../../views/seller/seller_main_view.dart';
+import '../../views/seller/seller_order_detail_view.dart';
+import '../../views/seller/seller_product_form_view.dart';
+import '../../views/seller/seller_edit_business_view.dart';
+import '../../views/driver/driver_main_view.dart';
+import '../../controllers/seller_setup_controller.dart';
+import '../../controllers/seller_store_controller.dart';
+import '../../controllers/seller_category_controller.dart';
+import '../../controllers/seller_product_form_controller.dart';
+import '../../controllers/seller_edit_business_controller.dart';
 
 import 'app_routes.dart';
 
@@ -161,6 +176,79 @@ class AppPages {
     GetPage<dynamic>(
       name: AppRoutes.locationPicker,
       page: LocationPickerView.new,
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.changePassword,
+      page: ChangePasswordView.new,
+      binding: BindingsBuilder<void>(() {
+        Get.lazyPut<ChangePasswordController>(
+          () => ChangePasswordController(Get.find<AuthService>()),
+        );
+      }),
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.sellerSetup,
+      page: SellerSetupView.new,
+      binding: BindingsBuilder<void>(() {
+        Get.lazyPut<SellerSetupController>(
+          () => SellerSetupController(Get.find<AuthService>()),
+        );
+      }),
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.seller,
+      page: SellerMainView.new,
+      binding: BindingsBuilder<void>(() {
+        Get.lazyPut<SellerOrdersController>(
+          () => SellerOrdersController(
+            Firebase.apps.isNotEmpty ? FirebaseFirestore.instance : null,
+          ),
+        );
+        Get.lazyPut<SellerStoreController>(
+          () => SellerStoreController(
+            Firebase.apps.isNotEmpty ? FirebaseFirestore.instance : null,
+          ),
+        );
+        Get.lazyPut<SellerCategoryController>(
+          () => SellerCategoryController(
+            Firebase.apps.isNotEmpty ? FirebaseFirestore.instance : null,
+          ),
+        );
+      }),
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.sellerOrderDetail,
+      page: SellerOrderDetailView.new,
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.sellerProductForm,
+      page: SellerProductFormView.new,
+      binding: BindingsBuilder<void>(() {
+        Get.lazyPut<SellerProductFormController>(
+          () => SellerProductFormController(),
+        );
+      }),
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.sellerEditBusiness,
+      page: SellerEditBusinessView.new,
+      binding: BindingsBuilder<void>(() {
+        Get.lazyPut<SellerEditBusinessController>(
+          () => SellerEditBusinessController(Get.find<AuthService>()),
+        );
+      }),
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.driver,
+      page: DriverMainView.new,
+      binding: BindingsBuilder<void>(() {
+        Get.lazyPut<DriverOrdersController>(
+          () => DriverOrdersController(
+            Get.find<AuthService>(),
+            Firebase.apps.isNotEmpty ? FirebaseFirestore.instance : null,
+          ),
+        );
+      }),
     ),
   ];
 }

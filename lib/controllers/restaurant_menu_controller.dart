@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../models/popular_dish_model.dart';
 import '../models/restaurant_model.dart';
+import 'cart_controller.dart';
 import 'main_controller.dart';
 
 /// Shows a restaurant and its menu (dishes). Receives [RestaurantModel] via Get.arguments.
@@ -29,6 +30,12 @@ class RestaurantMenuController extends GetxController {
   }
 
   void openDish(PopularDishModel dish) {
+    // Tag the cart with this restaurant before opening dish
+    final cart = Get.find<CartController>();
+    if (_restaurant != null) {
+      cart.restaurantId = _restaurant!.id;
+      cart.restaurantName = _restaurant!.name;
+    }
     Get.toNamed<void>(
       '/product-detail',
       arguments: dish,

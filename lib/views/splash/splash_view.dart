@@ -1,10 +1,9 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../core/routes/app_routes.dart';
 import '../../services/auth_service.dart';
+import '../../services/user_service.dart';
 
 class SplashView extends StatefulWidget {
   const SplashView({super.key});
@@ -51,22 +50,33 @@ class _SplashViewState extends State<SplashView>
     });
   }
 
+  Future<void> _navigateAfterDelay() async {
+    final authService = Get.find<AuthService>();
+    // Wait for both: minimum splash time AND Firebase auth state to be known.
+    // awaitAuthState() resolves as soon as Firebase emits (null = logged out,
+    // User = logged in), so we never check isLoggedIn before Firebase is ready.
+    await Future.wait([
+      Future<void>.delayed(const Duration(milliseconds: 2000)),
+      authService.awaitAuthState(),
+    ]);
+    if (!mounted) return;
+
+    if (authService.isLoggedIn) {
+      final uid = authService.currentUser.value!.uid;
+      final userService = Get.find<UserService>();
+      final role = await userService.fetchRoleForUid(uid);
+      if (!mounted) return;
+      Get.offAllNamed<void>(UserService.routeForRole(role));
+    } else {
+      Get.offAllNamed<void>(AppRoutes.auth);
+    }
+  }
+
   @override
   void dispose() {
     _scaleController.dispose();
     _pulseController.dispose();
     super.dispose();
-  }
-
-  Future<void> _navigateAfterDelay() async {
-    await Future<void>.delayed(const Duration(milliseconds: 2200));
-    if (!mounted) return;
-    final authService = Get.find<AuthService>();
-    if (authService.isLoggedIn) {
-      Get.offAllNamed<void>(AppRoutes.home);
-    } else {
-      Get.offAllNamed<void>(AppRoutes.auth);
-    }
   }
 
   @override

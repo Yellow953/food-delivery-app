@@ -1,8 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../core/routes/app_routes.dart';
 import '../services/auth_service.dart';
+import '../services/user_service.dart';
 
 /// Handles sign-up page state and registration.
 class SignupController extends GetxController {
@@ -10,6 +13,8 @@ class SignupController extends GetxController {
 
   final AuthService _authService;
 
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
@@ -18,6 +23,11 @@ class SignupController extends GetxController {
   final RxString errorMessage = ''.obs;
   final RxBool obscurePassword = true.obs;
   final RxBool obscureConfirmPassword = true.obs;
+
+  /// 'customer' | 'driver' | 'seller'
+  final RxString selectedRole = 'customer'.obs;
+
+  void selectRole(String role) => selectedRole.value = role;
 
   void togglePasswordVisibility() {
     obscurePassword.value = !obscurePassword.value;
@@ -29,6 +39,8 @@ class SignupController extends GetxController {
 
   @override
   void onClose() {
+    nameController.dispose();
+    phoneController.dispose();
     emailController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
@@ -41,10 +53,16 @@ class SignupController extends GetxController {
           'Firebase is not configured. Run "flutterfire configure" (see FIREBASE_SETUP.md).';
       return;
     }
+    final name = nameController.text.trim();
+    final phone = phoneController.text.trim();
     final email = emailController.text.trim();
     final password = passwordController.text;
     final confirm = confirmPasswordController.text;
 
+    if (name.isEmpty) {
+      errorMessage.value = 'Please enter your name';
+      return;
+    }
     if (email.isEmpty) {
       errorMessage.value = 'Please enter your email';
       return;
@@ -65,8 +83,25 @@ class SignupController extends GetxController {
     errorMessage.value = '';
     isLoading.value = true;
     try {
-      await _authService.signUpWithEmailAndPassword(email, password);
-      Get.offAllNamed<void>(AppRoutes.home);
+      final credential = await _authService.signUpWithEmailAndPassword(email, password);
+      final uid = credential.user?.uid;
+      if (uid != null) {
+        await credential.user?.updateDisplayName(name);
+        if (Firebase.apps.isNotEmpty) {
+          await FirebaseFirestore.instance.collection('users').doc(uid).set({
+            'role': selectedRole.value,
+            'name': name,
+            'phone': phone,
+            'email': email,
+            'createdAt': FieldValue.serverTimestamp(),
+          });
+        }
+      }
+      if (selectedRole.value == 'seller') {
+        Get.offAllNamed<void>(AppRoutes.sellerSetup);
+      } else {
+        Get.offAllNamed<void>(UserService.routeForRole(selectedRole.value));
+      }
     } on Exception catch (e) {
       errorMessage.value = e.toString().replaceFirst('Exception: ', '');
     } finally {

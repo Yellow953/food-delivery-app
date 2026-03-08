@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -9,6 +11,7 @@ class EditProfileController extends GetxController {
   final AuthService _authService;
 
   late final TextEditingController nameController;
+  late final TextEditingController phoneController;
   final RxBool isSaving = false.obs;
   final RxString error = ''.obs;
 
@@ -20,11 +23,28 @@ class EditProfileController extends GetxController {
     nameController = TextEditingController(
       text: _authService.currentUser.value?.displayName ?? '',
     );
+    phoneController = TextEditingController();
+    _loadPhone();
+  }
+
+  Future<void> _loadPhone() async {
+    final uid = _authService.currentUser.value?.uid;
+    if (uid == null || Firebase.apps.isEmpty) return;
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .get();
+      if (doc.exists) {
+        phoneController.text = doc.data()?['phone'] as String? ?? '';
+      }
+    } catch (_) {}
   }
 
   @override
   void onClose() {
     nameController.dispose();
+    phoneController.dispose();
     super.onClose();
   }
 
@@ -38,6 +58,13 @@ class EditProfileController extends GetxController {
     isSaving.value = true;
     try {
       await _authService.currentUser.value?.updateDisplayName(name);
+      final uid = _authService.currentUser.value?.uid;
+      if (uid != null && Firebase.apps.isNotEmpty) {
+        await FirebaseFirestore.instance.collection('users').doc(uid).update({
+          'name': name,
+          'phone': phoneController.text.trim(),
+        });
+      }
       Get.back<void>();
       Get.snackbar(
         'Saved',

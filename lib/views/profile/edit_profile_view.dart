@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../controllers/edit_profile_controller.dart';
+import '../../core/routes/app_routes.dart';
 
 class EditProfileView extends GetView<EditProfileController> {
   const EditProfileView({super.key});
@@ -142,6 +143,19 @@ class EditProfileView extends GetView<EditProfileController> {
                     const SizedBox(height: 20),
                     const Divider(height: 1),
                     const SizedBox(height: 20),
+                    _FieldLabel('Phone number'),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: controller.phoneController,
+                      keyboardType: TextInputType.phone,
+                      decoration: const InputDecoration(
+                        hintText: '+1 555 000 0000',
+                        prefixIcon: Icon(Icons.phone_outlined),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    const Divider(height: 1),
+                    const SizedBox(height: 20),
                     _FieldLabel('Email'),
                     const SizedBox(height: 8),
                     TextField(
@@ -167,6 +181,15 @@ class EditProfileView extends GetView<EditProfileController> {
                   ],
                 ),
               ),
+            ),
+            const SizedBox(height: 20),
+            ListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+              leading: Icon(Icons.lock_reset_rounded, color: colorScheme.primary),
+              title: const Text('Change password'),
+              trailing: Icon(Icons.chevron_right_rounded,
+                  color: colorScheme.onSurfaceVariant),
+              onTap: () => Get.toNamed<void>(AppRoutes.changePassword),
             ),
             const SizedBox(height: 40),
           ],

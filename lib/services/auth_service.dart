@@ -12,6 +12,8 @@ abstract class AuthService extends GetxService {
   bool get isLoggedIn;
   /// False when running without Firebase (stub). Use to show setup message.
   bool get isFirebaseConfigured;
+  /// Waits until Firebase has emitted the initial auth state (logged in or not).
+  Future<void> awaitAuthState();
   Future<void> signInWithEmailAndPassword(String email, String password);
   Future<UserCredential> signUpWithEmailAndPassword(
     String email,
@@ -43,6 +45,11 @@ class FirebaseAuthService extends AuthService {
 
   @override
   bool get isFirebaseConfigured => true;
+
+  @override
+  Future<void> awaitAuthState() async {
+    await _auth.authStateChanges().first;
+  }
 
   @override
   Future<void> signInWithEmailAndPassword(
@@ -91,6 +98,9 @@ class StubAuthService extends AuthService {
 
   @override
   bool get isFirebaseConfigured => false;
+
+  @override
+  Future<void> awaitAuthState() async {}
 
   @override
   Future<void> signInWithEmailAndPassword(

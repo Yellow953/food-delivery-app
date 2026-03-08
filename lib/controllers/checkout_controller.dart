@@ -121,6 +121,8 @@ class CheckoutController extends GetxController {
       if (_firestore != null) {
         final docRef = await _firestore!.collection('orders').add({
           'userId': _authService.currentUser.value?.uid ?? '',
+          'restaurantId': _cart.restaurantId ?? '',
+          'restaurantName': _cart.restaurantName ?? '',
           'customerName': name,
           'customerPhone': phoneController.text.trim(),
           'customerEmail': emailController.text.trim(),

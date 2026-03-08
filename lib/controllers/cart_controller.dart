@@ -8,6 +8,10 @@ class CartController extends GetxController {
 
   final RxList<CartItem> items = <CartItem>[].obs;
 
+  /// The restaurant this cart is associated with (set when adding from restaurant menu).
+  String? restaurantId;
+  String? restaurantName;
+
   int get totalItemCount =>
       items.fold(0, (sum, item) => sum + item.quantity);
 
@@ -47,5 +51,7 @@ class CartController extends GetxController {
 
   void clear() {
     items.clear();
+    restaurantId = null;
+    restaurantName = null;
   }
 }

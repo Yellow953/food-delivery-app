@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../core/routes/app_routes.dart';
 import '../services/auth_service.dart';
+import '../services/user_service.dart';
 
 /// Handles auth screen state and sign-in / sign-up.
 class AuthController extends GetxController {
@@ -30,6 +30,14 @@ class AuthController extends GetxController {
 
   bool get isLoggedIn => _authService.isLoggedIn;
 
+  Future<void> _navigateByRole() async {
+    final uid = _authService.currentUser.value?.uid;
+    if (uid == null) return;
+    final userService = Get.find<UserService>();
+    final role = await userService.fetchRoleForUid(uid);
+    Get.offAllNamed<void>(UserService.routeForRole(role));
+  }
+
   Future<void> signIn(String email, String password) async {
     if (!_authService.isFirebaseConfigured) {
       errorMessage.value =
@@ -44,7 +52,7 @@ class AuthController extends GetxController {
     isLoading.value = true;
     try {
       await _authService.signInWithEmailAndPassword(email, password);
-      Get.offAllNamed<void>(AppRoutes.home);
+      await _navigateByRole();
     } on Exception catch (e) {
       errorMessage.value = e.toString().replaceFirst('Exception: ', '');
     } finally {
@@ -70,7 +78,7 @@ class AuthController extends GetxController {
     isLoading.value = true;
     try {
       await _authService.signUpWithEmailAndPassword(email, password);
-      Get.offAllNamed<void>(AppRoutes.home);
+      await _navigateByRole();
     } on Exception catch (e) {
       errorMessage.value = e.toString().replaceFirst('Exception: ', '');
     } finally {
@@ -88,7 +96,7 @@ class AuthController extends GetxController {
     isLoading.value = true;
     try {
       await _authService.signInWithGoogle();
-      Get.offAllNamed<void>(AppRoutes.home);
+      await _navigateByRole();
     } on Exception catch (e) {
       errorMessage.value = e.toString().replaceFirst('Exception: ', '');
     } finally {

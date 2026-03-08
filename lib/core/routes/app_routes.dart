@@ -15,4 +15,15 @@ abstract class AppRoutes {
   static const String notifications = '/notifications';
   static const String settings = '/settings';
   static const String locationPicker = '/location-picker';
+  static const String changePassword = '/change-password';
+
+  // Seller
+  static const String seller = '/seller';
+  static const String sellerSetup = '/seller-setup';
+  static const String sellerOrderDetail = '/seller-order-detail';
+  static const String sellerProductForm = '/seller-product-form';
+  static const String sellerEditBusiness = '/seller-edit-business';
+
+  // Driver
+  static const String driver = '/driver';
 }

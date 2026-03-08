@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../controllers/addresses_controller.dart';
 import '../../controllers/cart_controller.dart';
 import '../../services/auth_service.dart';
+import '../../services/user_service.dart';
 
 /// Global bindings applied at app startup.
 class InitialBinding extends Bindings {
@@ -16,5 +17,6 @@ class InitialBinding extends Bindings {
     }
     Get.put<CartController>(CartController(), permanent: true);
     Get.put<AddressesController>(AddressesController(), permanent: true);
+    Get.put<UserService>(UserService(), permanent: true);
   }
 }
