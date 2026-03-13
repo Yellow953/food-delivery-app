@@ -43,6 +43,7 @@ import '../../controllers/seller_setup_controller.dart';
 import '../../controllers/seller_store_controller.dart';
 import '../../controllers/seller_category_controller.dart';
 import '../../controllers/seller_dashboard_controller.dart';
+import '../../controllers/driver_dashboard_controller.dart';
 import '../../controllers/seller_product_form_controller.dart';
 import '../../controllers/seller_edit_business_controller.dart';
 
@@ -129,7 +130,10 @@ class AppPages {
       page: RestaurantMenuView.new,
       binding: BindingsBuilder<void>(() {
         Get.lazyPut<RestaurantMenuController>(
-          () => RestaurantMenuController(Get.find<MainController>()),
+          () => RestaurantMenuController(
+            Get.find<MainController>(),
+            Firebase.apps.isNotEmpty ? FirebaseFirestore.instance : null,
+          ),
         );
       }),
     ),
@@ -250,6 +254,12 @@ class AppPages {
       binding: BindingsBuilder<void>(() {
         Get.lazyPut<DriverOrdersController>(
           () => DriverOrdersController(
+            Get.find<AuthService>(),
+            Firebase.apps.isNotEmpty ? FirebaseFirestore.instance : null,
+          ),
+        );
+        Get.lazyPut<DriverDashboardController>(
+          () => DriverDashboardController(
             Get.find<AuthService>(),
             Firebase.apps.isNotEmpty ? FirebaseFirestore.instance : null,
           ),

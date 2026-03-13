@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../controllers/restaurant_menu_controller.dart';
-import '../../models/popular_dish_model.dart';
+import '../../models/seller_product_model.dart';
 import '../../widgets/cart_icon_button.dart';
 
 class RestaurantMenuView extends GetView<RestaurantMenuController> {
@@ -40,9 +40,7 @@ class RestaurantMenuView extends GetView<RestaurantMenuController> {
               icon: Icons.arrow_back_rounded,
               onPressed: () => Get.back<void>(),
             ),
-            actions: const [
-              CartIconButton(),
-            ],
+            actions: const [CartIconButton()],
             flexibleSpace: FlexibleSpaceBar(
               collapseMode: CollapseMode.parallax,
               titlePadding: EdgeInsets.zero,
@@ -91,13 +89,16 @@ class RestaurantMenuView extends GetView<RestaurantMenuController> {
                             color: Colors.white,
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
-                            shadows: [Shadow(color: Colors.black54, blurRadius: 4)],
+                            shadows: [
+                              Shadow(color: Colors.black54, blurRadius: 4)
+                            ],
                           ),
                         ),
                         const SizedBox(height: 6),
                         Row(
                           children: [
-                            const Icon(Icons.star_rounded, size: 16, color: Colors.amber),
+                            const Icon(Icons.star_rounded,
+                                size: 16, color: Colors.amber),
                             const SizedBox(width: 4),
                             Text(
                               restaurant.rating,
@@ -135,7 +136,8 @@ class RestaurantMenuView extends GetView<RestaurantMenuController> {
                 color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
                 borderRadius: BorderRadius.circular(16),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                   child: Row(
                     children: [
                       Expanded(
@@ -151,7 +153,8 @@ class RestaurantMenuView extends GetView<RestaurantMenuController> {
                             icon: Icons.share_rounded,
                             label: 'Share',
                             onTap: () {
-                              final box = ctx.findRenderObject() as RenderBox?;
+                              final box =
+                                  ctx.findRenderObject() as RenderBox?;
                               final rect = box != null
                                   ? box.localToGlobal(Offset.zero) & box.size
                                   : null;
@@ -179,7 +182,8 @@ class RestaurantMenuView extends GetView<RestaurantMenuController> {
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
                 child: Row(
                   children: [
-                    Icon(Icons.place_rounded, size: 18, color: colorScheme.onSurfaceVariant),
+                    Icon(Icons.place_rounded,
+                        size: 18, color: colorScheme.onSurfaceVariant),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -204,9 +208,17 @@ class RestaurantMenuView extends GetView<RestaurantMenuController> {
               ),
             ),
           ),
-          GetBuilder<RestaurantMenuController>(builder: (_) {
-            final dishes = controller.menuDishes;
-            if (dishes.isEmpty) {
+          Obx(() {
+            if (controller.isLoading.value) {
+              return const SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.all(40),
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+              );
+            }
+            final products = controller.menuProducts;
+            if (products.isEmpty) {
               return SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.all(32),
@@ -226,15 +238,17 @@ class RestaurantMenuView extends GetView<RestaurantMenuController> {
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
-                    final dish = dishes[index];
-                    return _MenuDishTile(
-                      dish: dish,
-                      isFavorite: controller.isFavoriteDish(dish.id),
-                      onTap: () => controller.openDish(dish),
-                      onFavoriteTap: () => controller.toggleFavoriteDish(dish.id),
-                    );
+                    final product = products[index];
+                    return Obx(() => _MenuProductTile(
+                          product: product,
+                          isFavorite:
+                              controller.isFavoriteDish(product.id),
+                          onTap: () => controller.openProduct(product),
+                          onFavoriteTap: () =>
+                              controller.toggleFavoriteDish(product.id),
+                        ));
                   },
-                  childCount: dishes.length,
+                  childCount: products.length,
                 ),
               ),
             );
@@ -244,7 +258,6 @@ class RestaurantMenuView extends GetView<RestaurantMenuController> {
     );
   }
 }
-
 
 class _MenuActionChip extends StatelessWidget {
   const _MenuActionChip({
@@ -288,15 +301,15 @@ class _MenuActionChip extends StatelessWidget {
   }
 }
 
-class _MenuDishTile extends StatelessWidget {
-  const _MenuDishTile({
-    required this.dish,
+class _MenuProductTile extends StatelessWidget {
+  const _MenuProductTile({
+    required this.product,
     required this.isFavorite,
     required this.onTap,
     required this.onFavoriteTap,
   });
 
-  final PopularDishModel dish;
+  final SellerProductModel product;
   final bool isFavorite;
   final VoidCallback onTap;
   final VoidCallback onFavoriteTap;
@@ -328,23 +341,32 @@ class _MenuDishTile extends StatelessWidget {
                   child: SizedBox(
                     width: 100,
                     height: 100,
-                    child: CachedNetworkImage(
-                      imageUrl: dish.imageUrl,
-                      fit: BoxFit.cover,
-                      placeholder: (_, __) => Container(
-                        color: colorScheme.surfaceContainerHighest,
-                        child: const Center(
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                      ),
-                      errorWidget: (_, __, ___) => Container(
-                        color: colorScheme.surfaceContainerHighest,
-                        child: Icon(
-                          Icons.restaurant_rounded,
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
+                    child: product.primaryImage.isNotEmpty
+                        ? CachedNetworkImage(
+                            imageUrl: product.primaryImage,
+                            fit: BoxFit.cover,
+                            placeholder: (_, __) => Container(
+                              color: colorScheme.surfaceContainerHighest,
+                              child: const Center(
+                                child: CircularProgressIndicator(
+                                    strokeWidth: 2),
+                              ),
+                            ),
+                            errorWidget: (_, __, ___) => Container(
+                              color: colorScheme.surfaceContainerHighest,
+                              child: Icon(
+                                Icons.restaurant_rounded,
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          )
+                        : Container(
+                            color: colorScheme.surfaceContainerHighest,
+                            child: Icon(
+                              Icons.restaurant_rounded,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
                   ),
                 ),
                 Expanded(
@@ -354,7 +376,7 @@ class _MenuDishTile extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          dish.title,
+                          product.title,
                           style: theme.textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
@@ -363,7 +385,7 @@ class _MenuDishTile extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          dish.subtitle,
+                          product.description,
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: colorScheme.onSurfaceVariant,
                           ),
@@ -372,7 +394,7 @@ class _MenuDishTile extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          dish.price,
+                          product.priceLabel,
                           style: theme.textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: colorScheme.secondary,

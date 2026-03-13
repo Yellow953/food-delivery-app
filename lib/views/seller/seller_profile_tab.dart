@@ -198,6 +198,26 @@ class SellerProfileTab extends StatelessWidget {
                         onTap: () => Get.toNamed<void>(
                             AppRoutes.sellerEditBusiness),
                       ),
+                      Divider(
+                          height: 1,
+                          color:
+                              colorScheme.outline.withValues(alpha: 0.5)),
+                      _ProfileTile(
+                        icon: Icons.notifications_outlined,
+                        title: 'Notifications',
+                        onTap: () =>
+                            Get.toNamed<void>(AppRoutes.notifications),
+                      ),
+                      Divider(
+                          height: 1,
+                          color:
+                              colorScheme.outline.withValues(alpha: 0.5)),
+                      _ProfileTile(
+                        icon: Icons.settings_outlined,
+                        title: 'Settings',
+                        onTap: () =>
+                            Get.toNamed<void>(AppRoutes.settings),
+                      ),
                     ],
                   ),
                 ),

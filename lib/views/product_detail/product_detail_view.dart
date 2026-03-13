@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../controllers/product_detail_controller.dart';
+import '../../models/seller_product_model.dart';
 import '../../widgets/cart_icon_button.dart';
 
 class ProductDetailView extends GetView<ProductDetailController> {
@@ -12,9 +13,9 @@ class ProductDetailView extends GetView<ProductDetailController> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final dish = controller.dish;
+    final product = controller.product;
 
-    if (dish == null) {
+    if (product == null) {
       return Scaffold(
         appBar: AppBar(title: const Text('Product')),
         body: const Center(child: Text('Product not found')),
@@ -33,37 +34,48 @@ class ProductDetailView extends GetView<ProductDetailController> {
             ),
             actions: [
               const CartIconButton(),
-              Obx(() => IconButton(
-                    icon: Icon(
-                      controller.isFavorite
-                          ? Icons.favorite_rounded
-                          : Icons.favorite_border_rounded,
-                      color: controller.isFavorite
-                          ? colorScheme.error
-                          : colorScheme.onSurface,
-                    ),
-                    onPressed: controller.toggleFavorite,
-                  )),
-            ],
-            flexibleSpace: FlexibleSpaceBar(
-              background: CachedNetworkImage(
-                imageUrl: dish.imageUrl,
-                fit: BoxFit.cover,
-                placeholder: (_, __) => Container(
-                  color: colorScheme.surfaceContainerHighest,
-                  child: const Center(
-                    child: CircularProgressIndicator(strokeWidth: 2),
+              GetBuilder<ProductDetailController>(
+                builder: (_) => IconButton(
+                  icon: Icon(
+                    controller.isFavorite
+                        ? Icons.favorite_rounded
+                        : Icons.favorite_border_rounded,
+                    color: controller.isFavorite
+                        ? colorScheme.error
+                        : colorScheme.onSurface,
                   ),
-                ),
-                errorWidget: (_, __, ___) => Container(
-                  color: colorScheme.surfaceContainerHighest,
-                  child: Icon(
-                    Icons.restaurant_rounded,
-                    size: 64,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
+                  onPressed: controller.toggleFavorite,
                 ),
               ),
+            ],
+            flexibleSpace: FlexibleSpaceBar(
+              background: product.primaryImage.isNotEmpty
+                  ? CachedNetworkImage(
+                      imageUrl: product.primaryImage,
+                      fit: BoxFit.cover,
+                      placeholder: (_, __) => Container(
+                        color: colorScheme.surfaceContainerHighest,
+                        child: const Center(
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      ),
+                      errorWidget: (_, __, ___) => Container(
+                        color: colorScheme.surfaceContainerHighest,
+                        child: Icon(
+                          Icons.restaurant_rounded,
+                          size: 64,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    )
+                  : Container(
+                      color: colorScheme.surfaceContainerHighest,
+                      child: Icon(
+                        Icons.restaurant_rounded,
+                        size: 64,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
             ),
           ),
           SliverToBoxAdapter(
@@ -73,98 +85,42 @@ class ProductDetailView extends GetView<ProductDetailController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    dish.title,
+                    product.title,
                     style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    dish.subtitle,
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
+                  if (product.description.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      product.description,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                        height: 1.5,
+                      ),
                     ),
-                  ),
+                  ],
                   const SizedBox(height: 20),
                   GetBuilder<ProductDetailController>(builder: (_) {
-                    return Row(
-                      children: [
-                        Text(
-                          controller.variantPriceLabel,
-                          style: theme.textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: colorScheme.secondary,
-                          ),
-                        ),
-                      ],
-                    );
-                  }),
-                  const SizedBox(height: 24),
-                  Text(
-                    'Size',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  GetBuilder<ProductDetailController>(builder: (_) {
-                    return Wrap(
-                      spacing: 10,
-                      runSpacing: 8,
-                      children: List.generate(
-                        ProductDetailController.sizeLabels.length,
-                        (i) => ChoiceChip(
-                          label: Text(
-                            '${ProductDetailController.sizeLabels[i]}'
-                            '${ProductDetailController.sizePriceOffsets[i] > 0 ? ' +\$${ProductDetailController.sizePriceOffsets[i].toStringAsFixed(0)}' : ''}',
-                          ),
-                          selected: controller.selectedSizeIndex == i,
-                          onSelected: (_) => controller.selectSize(i),
-                          selectedColor: colorScheme.secondaryContainer,
-                        ),
+                    return Text(
+                      controller.variantPriceLabel,
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.secondary,
                       ),
                     );
                   }),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Add-ons',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  GetBuilder<ProductDetailController>(builder: (_) {
-                    return Column(
-                      children: List.generate(
-                        ProductDetailController.addonLabels.length,
-                        (i) => CheckboxListTile(
-                          value: controller.isAddonSelected(i),
-                          onChanged: (_) => controller.toggleAddon(i),
-                          title: Text(
-                            '${ProductDetailController.addonLabels[i]} '
-                            '+\$${ProductDetailController.addonPrices[i].toStringAsFixed(2)}',
+                  // ── Variant groups ─────────────────────────────────────
+                  if (product.variantGroups.isNotEmpty) ...[
+                    const SizedBox(height: 24),
+                    ...product.variantGroups.asMap().entries.map(
+                          (entry) => _VariantGroupSection(
+                            groupIndex: entry.key,
+                            group: entry.value,
+                            controller: controller,
                           ),
-                          controlAffinity: ListTileControlAffinity.leading,
-                          contentPadding: EdgeInsets.zero,
                         ),
-                      ),
-                    );
-                  }),
-                  const SizedBox(height: 24),
-                  Text(
-                    'About this dish',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'A delicious choice made with fresh ingredients. Perfect for a satisfying meal.',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                      height: 1.5,
-                    ),
-                  ),
+                  ],
                 ],
               ),
             ),
@@ -187,6 +143,114 @@ class ProductDetailView extends GetView<ProductDetailController> {
             );
           }),
         ),
+      ),
+    );
+  }
+}
+
+// ─── Variant group section ────────────────────────────────────────────────────
+
+class _VariantGroupSection extends StatelessWidget {
+  const _VariantGroupSection({
+    required this.groupIndex,
+    required this.group,
+    required this.controller,
+  });
+
+  final int groupIndex;
+  final ProductVariantGroup group;
+  final ProductDetailController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                group.name,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: colorScheme.secondary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  group.typeLabel,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    color: colorScheme.secondary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          if (group.isSingle)
+            GetBuilder<ProductDetailController>(
+              builder: (_) => Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: group.options.asMap().entries.map((e) {
+                  final selected =
+                      controller.isOptionSelected(groupIndex, e.key);
+                  final extraLabel = e.value.additionalPrice > 0
+                      ? ' +\$${e.value.additionalPrice.toStringAsFixed(2)}'
+                      : '';
+                  return ChoiceChip(
+                    label: Text('${e.value.name}$extraLabel'),
+                    selected: selected,
+                    onSelected: (_) =>
+                        controller.selectOption(groupIndex, e.key),
+                    selectedColor: colorScheme.secondaryContainer,
+                  );
+                }).toList(),
+              ),
+            )
+          else
+            GetBuilder<ProductDetailController>(
+              builder: (_) => Column(
+                children: group.options.asMap().entries.map((e) {
+                  final selected =
+                      controller.isOptionSelected(groupIndex, e.key);
+                  final extraLabel = e.value.additionalPrice > 0
+                      ? '+\$${e.value.additionalPrice.toStringAsFixed(2)}'
+                      : 'Included';
+                  return CheckboxListTile(
+                    value: selected,
+                    onChanged: (_) =>
+                        controller.selectOption(groupIndex, e.key),
+                    title: Text(e.value.name),
+                    subtitle: Text(
+                      extraLabel,
+                      style: TextStyle(
+                        color: e.value.additionalPrice > 0
+                            ? colorScheme.secondary
+                            : colorScheme.onSurfaceVariant,
+                        fontSize: 12,
+                      ),
+                    ),
+                    controlAffinity: ListTileControlAffinity.leading,
+                    contentPadding: EdgeInsets.zero,
+                    activeColor: colorScheme.secondary,
+                  );
+                }).toList(),
+              ),
+            ),
+        ],
       ),
     );
   }

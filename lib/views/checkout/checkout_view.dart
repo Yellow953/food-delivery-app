@@ -536,19 +536,27 @@ class _CartItemRow extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
-            child: CachedNetworkImage(
-              imageUrl: item.dish.imageUrl,
-              width: 60,
-              height: 60,
-              fit: BoxFit.cover,
-              placeholder: (_, __) =>
-                  Container(color: colorScheme.surfaceContainerHighest),
-              errorWidget: (_, __, ___) => Container(
-                color: colorScheme.surfaceContainerHighest,
-                child: Icon(Icons.restaurant_rounded,
-                    color: colorScheme.onSurfaceVariant),
-              ),
-            ),
+            child: item.product.primaryImage.isNotEmpty
+                ? CachedNetworkImage(
+                    imageUrl: item.product.primaryImage,
+                    width: 60,
+                    height: 60,
+                    fit: BoxFit.cover,
+                    placeholder: (_, __) =>
+                        Container(color: colorScheme.surfaceContainerHighest),
+                    errorWidget: (_, __, ___) => Container(
+                      color: colorScheme.surfaceContainerHighest,
+                      child: Icon(Icons.restaurant_rounded,
+                          color: colorScheme.onSurfaceVariant),
+                    ),
+                  )
+                : Container(
+                    width: 60,
+                    height: 60,
+                    color: colorScheme.surfaceContainerHighest,
+                    child: Icon(Icons.restaurant_rounded,
+                        color: colorScheme.onSurfaceVariant),
+                  ),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -556,20 +564,18 @@ class _CartItemRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  item.dish.title,
+                  item.product.title,
                   style: theme.textTheme.titleSmall
                       ?.copyWith(fontWeight: FontWeight.w600),
                 ),
-                Text(
-                  item.sizeName +
-                      (item.addons.isNotEmpty
-                          ? ' · ${item.addons.join(', ')}'
-                          : ''),
-                  style: theme.textTheme.bodySmall
-                      ?.copyWith(color: colorScheme.onSurfaceVariant),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                if (item.variantSummary.isNotEmpty)
+                  Text(
+                    item.variantSummary,
+                    style: theme.textTheme.bodySmall
+                        ?.copyWith(color: colorScheme.onSurfaceVariant),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 const SizedBox(height: 6),
                 Text(
                   '\$${item.lineTotal.toStringAsFixed(2)}',

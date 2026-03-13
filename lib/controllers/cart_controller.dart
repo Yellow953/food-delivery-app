@@ -20,10 +20,12 @@ class CartController extends GetxController {
 
   double get total => subtotal + deliveryFee;
 
-  /// Adds an item. If the same dish+size is already in cart, increments quantity.
+  /// Adds an item. If the same product+variant is already in cart, increments quantity.
   void addItem(CartItem item) {
     final idx = items.indexWhere(
-      (i) => i.dish.id == item.dish.id && i.sizeName == item.sizeName,
+      (i) =>
+          i.product.id == item.product.id &&
+          i.variantSummary == item.variantSummary,
     );
     if (idx >= 0) {
       items[idx] = items[idx].copyWith(quantity: items[idx].quantity + 1);

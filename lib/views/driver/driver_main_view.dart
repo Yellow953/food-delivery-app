@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'driver_active_tab.dart';
 import 'driver_available_tab.dart';
+import 'driver_dashboard_tab.dart';
 import 'driver_history_tab.dart';
 import 'driver_profile_tab.dart';
 
@@ -25,6 +26,7 @@ class _DriverMainViewState extends State<DriverMainView> {
           DriverAvailableTab(),
           DriverActiveTab(),
           DriverHistoryTab(),
+          DriverDashboardTab(),
           DriverProfileTab(),
         ],
       ),
@@ -64,10 +66,16 @@ class _DriverMainViewState extends State<DriverMainView> {
                   onTap: () => setState(() => _index = 2),
                 ),
                 _NavItem(
-                  icon: Icons.person_rounded,
-                  label: 'Profile',
+                  icon: Icons.insights_rounded,
+                  label: 'Dashboard',
                   selected: _index == 3,
                   onTap: () => setState(() => _index = 3),
+                ),
+                _NavItem(
+                  icon: Icons.person_rounded,
+                  label: 'Profile',
+                  selected: _index == 4,
+                  onTap: () => setState(() => _index = 4),
                 ),
               ],
             ),
@@ -101,7 +109,7 @@ class _NavItem extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

@@ -108,10 +108,10 @@ class CheckoutController extends GetxController {
       final itemData = items
           .map(
             (item) => {
-              'dishTitle': item.dish.title,
-              'dishImageUrl': item.dish.imageUrl,
-              'sizeName': item.sizeName,
-              'addons': item.addons,
+              'dishTitle': item.product.title,
+              'dishImageUrl': item.product.primaryImage,
+              'sizeName': item.variantSummary,
+              'addons': <String>[],
               'price': item.price,
               'quantity': item.quantity,
             },

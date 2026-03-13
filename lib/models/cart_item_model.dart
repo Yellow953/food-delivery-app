@@ -1,27 +1,24 @@
-import 'popular_dish_model.dart';
+import 'seller_product_model.dart';
 
 class CartItem {
   CartItem({
-    required this.dish,
-    required this.sizeName,
+    required this.product,
+    required this.variantSummary,
     required this.price,
-    required this.addons,
     this.quantity = 1,
   });
 
-  final PopularDishModel dish;
-  final String sizeName;
-  final double price; // unit price including size offset
-  final List<String> addons;
+  final SellerProductModel product;
+  final String variantSummary;
+  final double price; // unit price including variant extras
   final int quantity;
 
   double get lineTotal => price * quantity;
 
   CartItem copyWith({int? quantity}) => CartItem(
-        dish: dish,
-        sizeName: sizeName,
+        product: product,
+        variantSummary: variantSummary,
         price: price,
-        addons: addons,
         quantity: quantity ?? this.quantity,
       );
 }
