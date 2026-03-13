@@ -42,6 +42,7 @@ import '../../views/driver/driver_main_view.dart';
 import '../../controllers/seller_setup_controller.dart';
 import '../../controllers/seller_store_controller.dart';
 import '../../controllers/seller_category_controller.dart';
+import '../../controllers/seller_dashboard_controller.dart';
 import '../../controllers/seller_product_form_controller.dart';
 import '../../controllers/seller_edit_business_controller.dart';
 
@@ -211,6 +212,11 @@ class AppPages {
         );
         Get.lazyPut<SellerCategoryController>(
           () => SellerCategoryController(
+            Firebase.apps.isNotEmpty ? FirebaseFirestore.instance : null,
+          ),
+        );
+        Get.lazyPut<SellerDashboardController>(
+          () => SellerDashboardController(
             Firebase.apps.isNotEmpty ? FirebaseFirestore.instance : null,
           ),
         );

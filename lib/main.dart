@@ -8,7 +8,6 @@ import 'core/platform_env.dart';
 import 'core/routes/app_pages.dart';
 import 'core/theme/app_theme.dart';
 import 'firebase_options.dart';
-import 'services/auth_service.dart';
 import 'services/firestore_seed_service.dart';
 
 Future<void> main() async {

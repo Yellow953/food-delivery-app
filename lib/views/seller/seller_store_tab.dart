@@ -422,11 +422,11 @@ class _ProductCard extends StatelessWidget {
                               fontSize: 11,
                               fontWeight: FontWeight.w500)),
                     ),
-                  if (product.variants.isNotEmpty)
+                  if (product.variantGroups.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.only(top: 2),
                       child: Text(
-                        '${product.variants.length} variant${product.variants.length > 1 ? 's' : ''}',
+                        '${product.variantGroups.length} variant group${product.variantGroups.length > 1 ? 's' : ''}',
                         style: const TextStyle(
                             color: Colors.black38, fontSize: 11),
                       ),

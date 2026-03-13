@@ -17,7 +17,8 @@ class SellerProductFormController extends GetxController {
 
   final RxString selectedCategory = ''.obs;
   final RxList<String> imageUrls = <String>[].obs;
-  final RxList<ProductVariantModel> variants = <ProductVariantModel>[].obs;
+  final RxList<ProductVariantGroup> variantGroups =
+      <ProductVariantGroup>[].obs;
   final RxBool isAvailable = true.obs;
   final RxBool isSaving = false.obs;
   final RxBool isUploadingImages = false.obs;
@@ -41,14 +42,12 @@ class SellerProductFormController extends GetxController {
     titleController = TextEditingController(text: p?.title ?? '');
     descriptionController = TextEditingController(text: p?.description ?? '');
     basePriceController = TextEditingController(
-      text: p != null && p.basePrice > 0
-          ? p.basePrice.toStringAsFixed(2)
-          : '',
+      text: p != null && p.basePrice > 0 ? p.basePrice.toStringAsFixed(2) : '',
     );
     if (p != null) {
       selectedCategory.value = p.category;
       imageUrls.assignAll(p.imageUrls);
-      variants.assignAll(p.variants);
+      variantGroups.assignAll(p.variantGroups);
       isAvailable.value = p.isAvailable;
     }
   }
@@ -70,8 +69,7 @@ class SellerProductFormController extends GetxController {
     isUploadingImages.value = true;
     try {
       final urls = await ImageUploadService.pickMultipleAndUpload(
-        'restaurants/$rid/products',
-      );
+          'restaurants/$rid/products');
       if (urls.isNotEmpty) imageUrls.addAll(urls);
     } finally {
       isUploadingImages.value = false;
@@ -88,22 +86,60 @@ class SellerProductFormController extends GetxController {
     imageUrls.insert(newIndex, item);
   }
 
-  // ─── Variants ────────────────────────────────────────────────────────────
+  // ─── Variant groups ───────────────────────────────────────────────────────
 
-  void addVariant(String name, double additionalPrice) {
+  void addVariantGroup(String name, String type) {
     if (name.trim().isEmpty) return;
-    variants.add(
-        ProductVariantModel(name: name.trim(), additionalPrice: additionalPrice));
+    variantGroups.add(
+        ProductVariantGroup(name: name.trim(), type: type, options: []));
   }
 
-  void removeVariant(int index) {
-    if (index >= 0 && index < variants.length) variants.removeAt(index);
+  void removeVariantGroup(int index) {
+    if (index >= 0 && index < variantGroups.length) {
+      variantGroups.removeAt(index);
+    }
   }
 
-  void updateVariant(int index, String name, double additionalPrice) {
-    if (index < 0 || index >= variants.length) return;
-    variants[index] =
-        ProductVariantModel(name: name.trim(), additionalPrice: additionalPrice);
+  void updateVariantGroup(int index, String name, String type) {
+    if (index < 0 || index >= variantGroups.length) return;
+    variantGroups[index] = variantGroups[index].copyWith(
+      name: name.trim(),
+      type: type,
+    );
+  }
+
+  void setGroupType(int index, String type) {
+    if (index < 0 || index >= variantGroups.length) return;
+    variantGroups[index] = variantGroups[index].copyWith(type: type);
+  }
+
+  // ─── Options within a group ───────────────────────────────────────────────
+
+  void addOption(int groupIndex, String name, double price) {
+    if (groupIndex < 0 || groupIndex >= variantGroups.length) return;
+    if (name.trim().isEmpty) return;
+    final group = variantGroups[groupIndex];
+    variantGroups[groupIndex] = group.copyWith(options: [
+      ...group.options,
+      ProductVariantOption(name: name.trim(), additionalPrice: price),
+    ]);
+  }
+
+  void removeOption(int groupIndex, int optionIndex) {
+    if (groupIndex < 0 || groupIndex >= variantGroups.length) return;
+    final group = variantGroups[groupIndex];
+    final newOpts = [...group.options]..removeAt(optionIndex);
+    variantGroups[groupIndex] = group.copyWith(options: newOpts);
+  }
+
+  void updateOption(
+      int groupIndex, int optionIndex, String name, double price) {
+    if (groupIndex < 0 || groupIndex >= variantGroups.length) return;
+    final group = variantGroups[groupIndex];
+    final newOpts = [...group.options];
+    newOpts[optionIndex] =
+        ProductVariantOption(name: name.trim(), additionalPrice: price);
+    variantGroups[groupIndex] = group.copyWith(options: newOpts);
   }
 
   // ─── Save ─────────────────────────────────────────────────────────────────
@@ -136,7 +172,7 @@ class SellerProductFormController extends GetxController {
         'category': selectedCategory.value,
         'basePrice': basePrice,
         'imageUrls': imageUrls.toList(),
-        'variants': variants.map((v) => v.toMap()).toList(),
+        'variants': variantGroups.map((g) => g.toMap()).toList(),
         'isAvailable': isAvailable.value,
         'updatedAt': FieldValue.serverTimestamp(),
       };

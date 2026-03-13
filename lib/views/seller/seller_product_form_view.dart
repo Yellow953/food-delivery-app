@@ -239,10 +239,42 @@ class SellerProductFormView extends GetView<SellerProductFormController> {
                 ),
                 const SliverToBoxAdapter(child: SizedBox(height: 8)),
                 SliverToBoxAdapter(
-                  child: _VariantsSection(controller: controller),
+                  child: _VariantGroupsSection(controller: controller),
                 ),
 
-                const SliverToBoxAdapter(child: SizedBox(height: 32)),
+                // ── Bottom save button ────────────────────────────────────
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                    child: Obx(() => FilledButton(
+                          onPressed: controller.isSaving.value
+                              ? null
+                              : controller.save,
+                          style: FilledButton.styleFrom(
+                            minimumSize: const Size.fromHeight(52),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16)),
+                          ),
+                          child: controller.isSaving.value
+                              ? const SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 2.5,
+                                      color: Colors.white),
+                                )
+                              : Text(
+                                  controller.isEditing
+                                      ? 'Save changes'
+                                      : 'Create product',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 15),
+                                ),
+                        )),
+                  ),
+                ),
+                const SliverToBoxAdapter(child: SizedBox(height: 16)),
               ],
             ),
           ),
@@ -524,121 +556,38 @@ class _Thumbnail extends StatelessWidget {
   }
 }
 
-// ─── Variants section ─────────────────────────────────────────────────────────
+// ─── Variant groups section ───────────────────────────────────────────────────
 
-class _VariantsSection extends StatelessWidget {
-  const _VariantsSection({required this.controller});
+class _VariantGroupsSection extends StatelessWidget {
+  const _VariantGroupsSection({required this.controller});
   final SellerProductFormController controller;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return Obx(() {
-      final variants = controller.variants;
+      final groups = controller.variantGroups;
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (variants.isNotEmpty)
-              _ShadowCard(
-                padding: EdgeInsets.zero,
-                children: List.generate(variants.length, (i) {
-                  final v = variants[i];
-                  return Column(
-                    children: [
-                      if (i > 0)
-                        Divider(
-                            height: 1,
-                            indent: 16,
-                            color: colorScheme.outlineVariant
-                                .withValues(alpha: 0.5)),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
-                        child: Row(
-                          children: [
-                            // Color dot accent
-                            Container(
-                              width: 8,
-                              height: 8,
-                              decoration: BoxDecoration(
-                                color: colorScheme.primary
-                                    .withValues(alpha: 0.6),
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.start,
-                                children: [
-                                  Text(v.name,
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 14)),
-                                  const SizedBox(height: 2),
-                                  Container(
-                                    padding:
-                                        const EdgeInsets.symmetric(
-                                            horizontal: 8, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: v.additionalPrice == 0
-                                          ? Colors.green
-                                              .withValues(alpha: 0.1)
-                                          : colorScheme.primaryContainer,
-                                      borderRadius:
-                                          BorderRadius.circular(20),
-                                    ),
-                                    child: Text(
-                                      v.additionalPrice == 0
-                                          ? 'Included'
-                                          : '+\$${v.additionalPrice.toStringAsFixed(2)}',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
-                                        color: v.additionalPrice == 0
-                                            ? Colors.green.shade700
-                                            : colorScheme.primary,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            IconButton(
-                              visualDensity: VisualDensity.compact,
-                              icon: Icon(Icons.edit_rounded,
-                                  size: 17,
-                                  color: colorScheme.onSurfaceVariant),
-                              onPressed: () => _showVariantSheet(context,
-                                  existing: v, index: i),
-                            ),
-                            IconButton(
-                              visualDensity: VisualDensity.compact,
-                              icon: Icon(Icons.delete_outline_rounded,
-                                  size: 17, color: colorScheme.error),
-                              onPressed: () =>
-                                  controller.removeVariant(i),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  );
-                }),
+            ...List.generate(groups.length, (gi) =>
+              _VariantGroupCard(
+                key: ValueKey('group_$gi'),
+                group: groups[gi],
+                groupIndex: gi,
+                controller: controller,
               ),
+            ),
             const SizedBox(height: 10),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: () => _showVariantSheet(context),
-                icon: const Icon(Icons.add_rounded, size: 18),
-                label: const Text('Add variant'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14)),
-                ),
+            OutlinedButton.icon(
+              onPressed: () => _showAddGroupSheet(context),
+              icon: const Icon(Icons.add_rounded, size: 18),
+              label: const Text('Add variant group'),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14)),
               ),
             ),
           ],
@@ -647,43 +596,414 @@ class _VariantsSection extends StatelessWidget {
     });
   }
 
-  Future<void> _showVariantSheet(BuildContext context,
-      {ProductVariantModel? existing, int? index}) async {
-    // Sheet returns the entered values via pop(); we act only after it's fully gone.
+  Future<void> _showAddGroupSheet(BuildContext context) async {
+    final result =
+        await showModalBottomSheet<(String, String)?>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const _VariantGroupSheet(),
+    );
+    if (result == null) return;
+    controller.addVariantGroup(result.$1, result.$2);
+  }
+}
+
+// ─── Single variant group card ────────────────────────────────────────────────
+
+class _VariantGroupCard extends StatelessWidget {
+  const _VariantGroupCard({
+    super.key,
+    required this.group,
+    required this.groupIndex,
+    required this.controller,
+  });
+
+  final ProductVariantGroup group;
+  final int groupIndex;
+  final SellerProductFormController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // ── Group header ──────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
+              child: Row(
+                children: [
+                  Icon(Icons.tune_rounded,
+                      size: 18, color: colorScheme.primary),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      group.name,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 14),
+                    ),
+                  ),
+                  // Edit group name
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    icon: Icon(Icons.edit_rounded,
+                        size: 16, color: colorScheme.onSurfaceVariant),
+                    onPressed: () =>
+                        _showEditGroupSheet(context),
+                  ),
+                  // Delete group
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    icon: Icon(Icons.delete_outline_rounded,
+                        size: 16, color: colorScheme.error),
+                    onPressed: () =>
+                        controller.removeVariantGroup(groupIndex),
+                  ),
+                ],
+              ),
+            ),
+
+            // ── Single / Multiple type toggle ─────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              child: Row(
+                children: [
+                  _TypeChip(
+                    label: 'Single choice',
+                    icon: Icons.radio_button_checked_rounded,
+                    selected: group.isSingle,
+                    onTap: () =>
+                        controller.setGroupType(groupIndex, 'single'),
+                  ),
+                  const SizedBox(width: 8),
+                  _TypeChip(
+                    label: 'Multiple choice',
+                    icon: Icons.check_box_rounded,
+                    selected: !group.isSingle,
+                    onTap: () =>
+                        controller.setGroupType(groupIndex, 'multiple'),
+                  ),
+                ],
+              ),
+            ),
+
+            Divider(
+                height: 1,
+                color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
+
+            // ── Options list ──────────────────────────────────────────
+            ...List.generate(group.options.length, (oi) {
+              final opt = group.options[oi];
+              return Column(
+                children: [
+                  if (oi > 0)
+                    Divider(
+                        height: 1,
+                        indent: 48,
+                        color: colorScheme.outlineVariant
+                            .withValues(alpha: 0.4)),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+                    child: Row(
+                      children: [
+                        Icon(
+                          group.isSingle
+                              ? Icons.radio_button_unchecked_rounded
+                              : Icons.check_box_outline_blank_rounded,
+                          size: 18,
+                          color: colorScheme.onSurfaceVariant
+                              .withValues(alpha: 0.5),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(opt.name,
+                              style: const TextStyle(fontSize: 13)),
+                        ),
+                        _PriceBadge(option: opt, colorScheme: colorScheme),
+                        IconButton(
+                          visualDensity: VisualDensity.compact,
+                          icon: Icon(Icons.edit_rounded,
+                              size: 15,
+                              color: colorScheme.onSurfaceVariant),
+                          onPressed: () =>
+                              _showEditOptionSheet(context, oi, opt),
+                        ),
+                        IconButton(
+                          visualDensity: VisualDensity.compact,
+                          icon: Icon(Icons.close_rounded,
+                              size: 15, color: colorScheme.error),
+                          onPressed: () =>
+                              controller.removeOption(groupIndex, oi),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            }),
+
+            // ── Add option button ─────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
+              child: TextButton.icon(
+                onPressed: () => _showAddOptionSheet(context),
+                icon: const Icon(Icons.add_rounded, size: 16),
+                label: const Text('Add option',
+                    style: TextStyle(fontSize: 13)),
+                style: TextButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 6),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showEditGroupSheet(BuildContext context) async {
+    final result =
+        await showModalBottomSheet<(String, String)?>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) =>
+          _VariantGroupSheet(existingName: group.name, existingType: group.type),
+    );
+    if (result == null) return;
+    controller.updateVariantGroup(groupIndex, result.$1, result.$2);
+  }
+
+  Future<void> _showAddOptionSheet(BuildContext context) async {
     final result = await showModalBottomSheet<(String, double)?>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _VariantSheet(existing: existing),
+      builder: (_) => const _OptionSheet(),
     );
     if (result == null) return;
-    final (name, price) = result;
-    if (index != null) {
-      controller.updateVariant(index, name, price);
-    } else {
-      controller.addVariant(name, price);
-    }
+    controller.addOption(groupIndex, result.$1, result.$2);
+  }
+
+  Future<void> _showEditOptionSheet(
+      BuildContext context, int optionIndex, ProductVariantOption opt) async {
+    final result = await showModalBottomSheet<(String, double)?>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _OptionSheet(existing: opt),
+    );
+    if (result == null) return;
+    controller.updateOption(groupIndex, optionIndex, result.$1, result.$2);
   }
 }
 
-/// Stateful bottom sheet. Pops with `(name, price)` on confirm, null on cancel.
-/// Controllers are disposed in [State.dispose], never via whenComplete.
-class _VariantSheet extends StatefulWidget {
-  const _VariantSheet({this.existing});
-  final ProductVariantModel? existing;
+class _PriceBadge extends StatelessWidget {
+  const _PriceBadge({required this.option, required this.colorScheme});
+  final ProductVariantOption option;
+  final ColorScheme colorScheme;
 
   @override
-  State<_VariantSheet> createState() => _VariantSheetState();
+  Widget build(BuildContext context) {
+    final free = option.additionalPrice == 0;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: free
+            ? Colors.green.withValues(alpha: 0.1)
+            : colorScheme.primaryContainer,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        option.priceLabel,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          color: free ? Colors.green.shade700 : colorScheme.onPrimaryContainer,
+        ),
+      ),
+    );
+  }
 }
 
-class _VariantSheetState extends State<_VariantSheet> {
+class _TypeChip extends StatelessWidget {
+  const _TypeChip({
+    required this.label,
+    required this.icon,
+    required this.selected,
+    required this.onTap,
+  });
+  final String label;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        padding:
+            const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: selected
+              ? colorScheme.primaryContainer
+              : colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: selected
+                ? colorScheme.primary
+                : colorScheme.outlineVariant,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon,
+                size: 14,
+                color: selected
+                    ? colorScheme.onPrimaryContainer
+                    : colorScheme.onSurfaceVariant),
+            const SizedBox(width: 5),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
+                color: selected
+                    ? colorScheme.onPrimaryContainer
+                    : colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Bottom sheets ────────────────────────────────────────────────────────────
+
+/// Sheet to create/edit a variant group (name + type).
+class _VariantGroupSheet extends StatefulWidget {
+  const _VariantGroupSheet({this.existingName, this.existingType});
+  final String? existingName;
+  final String? existingType;
+
+  @override
+  State<_VariantGroupSheet> createState() => _VariantGroupSheetState();
+}
+
+class _VariantGroupSheetState extends State<_VariantGroupSheet> {
+  late final TextEditingController _nameCtrl;
+  late String _type;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameCtrl = TextEditingController(text: widget.existingName ?? '');
+    _type = widget.existingType ?? 'single';
+  }
+
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isEditing = widget.existingName != null;
+    return _Sheet(
+      title: isEditing ? 'Edit variant group' : 'New variant group',
+      confirmLabel: isEditing ? 'Save' : 'Add group',
+      onConfirm: () {
+        if (_nameCtrl.text.trim().isEmpty) return;
+        Navigator.of(context).pop((_nameCtrl.text.trim(), _type));
+      },
+      children: [
+        _SheetField(
+          controller: _nameCtrl,
+          hint: 'Group name  (e.g. Size, Extras, Sauce)',
+          icon: Icons.label_outline_rounded,
+          autofocus: true,
+        ),
+        const SizedBox(height: 16),
+        Text('Customer selection type',
+            style: TextStyle(
+                fontSize: 12,
+                color: colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500)),
+        const SizedBox(height: 8),
+        StatefulBuilder(
+          builder: (_, setState) => Row(
+            children: [
+              Expanded(
+                child: _TypeTile(
+                  icon: Icons.radio_button_checked_rounded,
+                  title: 'Single choice',
+                  subtitle: 'Pick exactly one',
+                  selected: _type == 'single',
+                  onTap: () => setState(() => _type = 'single'),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _TypeTile(
+                  icon: Icons.check_box_rounded,
+                  title: 'Multiple choice',
+                  subtitle: 'Pick many',
+                  selected: _type == 'multiple',
+                  onTap: () => setState(() => _type = 'multiple'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Sheet to add/edit an option inside a group.
+class _OptionSheet extends StatefulWidget {
+  const _OptionSheet({this.existing});
+  final ProductVariantOption? existing;
+
+  @override
+  State<_OptionSheet> createState() => _OptionSheetState();
+}
+
+class _OptionSheetState extends State<_OptionSheet> {
   late final TextEditingController _nameCtrl;
   late final TextEditingController _priceCtrl;
 
   @override
   void initState() {
     super.initState();
-    _nameCtrl = TextEditingController(text: widget.existing?.name ?? '');
+    _nameCtrl =
+        TextEditingController(text: widget.existing?.name ?? '');
     _priceCtrl = TextEditingController(
       text: widget.existing != null && widget.existing!.additionalPrice > 0
           ? widget.existing!.additionalPrice.toStringAsFixed(2)
@@ -700,6 +1020,52 @@ class _VariantSheetState extends State<_VariantSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final isEditing = widget.existing != null;
+    return _Sheet(
+      title: isEditing ? 'Edit option' : 'New option',
+      confirmLabel: isEditing ? 'Save' : 'Add option',
+      onConfirm: () {
+        if (_nameCtrl.text.trim().isEmpty) return;
+        final price =
+            double.tryParse(_priceCtrl.text.trim()) ?? 0.0;
+        Navigator.of(context).pop((_nameCtrl.text.trim(), price));
+      },
+      children: [
+        _SheetField(
+          controller: _nameCtrl,
+          hint: 'Option name  (e.g. Small, Spicy, Extra Cheese)',
+          icon: Icons.label_outline_rounded,
+          autofocus: true,
+        ),
+        const SizedBox(height: 12),
+        _SheetField(
+          controller: _priceCtrl,
+          hint: 'Additional price  (leave blank if included)',
+          icon: Icons.add_rounded,
+          keyboardType:
+              const TextInputType.numberWithOptions(decimal: true),
+          prefixText: '\$ ',
+        ),
+      ],
+    );
+  }
+}
+
+/// Shared bottom sheet chrome.
+class _Sheet extends StatelessWidget {
+  const _Sheet({
+    required this.title,
+    required this.confirmLabel,
+    required this.onConfirm,
+    required this.children,
+  });
+  final String title;
+  final String confirmLabel;
+  final VoidCallback onConfirm;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
@@ -713,7 +1079,6 @@ class _VariantSheetState extends State<_VariantSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Handle
           Center(
             child: Container(
               width: 36,
@@ -725,88 +1090,138 @@ class _VariantSheetState extends State<_VariantSheet> {
             ),
           ),
           const SizedBox(height: 20),
-          Text(
-            widget.existing != null ? 'Edit variant' : 'New variant',
-            style: const TextStyle(
-                fontWeight: FontWeight.bold, fontSize: 18),
-          ),
+          Text(title,
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold, fontSize: 18)),
           const SizedBox(height: 20),
-          // Name field
-          Container(
-            decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: TextField(
-              controller: _nameCtrl,
-              autofocus: true,
-              textCapitalization: TextCapitalization.words,
-              decoration: InputDecoration(
-                hintText: 'Name  (e.g. Small, Large, Spicy)',
-                prefixIcon: Icon(Icons.label_outline_rounded,
-                    color: colorScheme.primary),
-                border: InputBorder.none,
-                contentPadding:
-                    const EdgeInsets.symmetric(vertical: 14),
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          // Price field
-          Container(
-            decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: TextField(
-              controller: _priceCtrl,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-              decoration: InputDecoration(
-                hintText: 'Additional price  (0.00 if included)',
-                prefixIcon: Icon(Icons.add_rounded,
-                    color: colorScheme.primary),
-                prefixText: '\$ ',
-                border: InputBorder.none,
-                contentPadding:
-                    const EdgeInsets.symmetric(vertical: 14),
-              ),
-            ),
-          ),
+          ...children,
           const SizedBox(height: 24),
           FilledButton(
-            onPressed: _submit,
+            onPressed: onConfirm,
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14)),
             ),
-            child: Text(
-              widget.existing != null ? 'Save changes' : 'Add variant',
-              style: const TextStyle(
-                  fontWeight: FontWeight.w700, fontSize: 15),
-            ),
+            child: Text(confirmLabel,
+                style: const TextStyle(
+                    fontWeight: FontWeight.w700, fontSize: 15)),
           ),
         ],
       ),
     );
   }
+}
 
-  void _submit() {
-    final name = _nameCtrl.text.trim();
-    if (name.isEmpty) return;
-    final price = double.tryParse(_priceCtrl.text.trim()) ?? 0.0;
-    // Pop with the result — caller processes it after sheet is fully dismissed.
-    Navigator.of(context).pop((name, price));
+class _SheetField extends StatelessWidget {
+  const _SheetField({
+    required this.controller,
+    required this.hint,
+    required this.icon,
+    this.keyboardType,
+    this.prefixText,
+    this.autofocus = false,
+  });
+  final TextEditingController controller;
+  final String hint;
+  final IconData icon;
+  final TextInputType? keyboardType;
+  final String? prefixText;
+  final bool autofocus;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: TextField(
+        controller: controller,
+        autofocus: autofocus,
+        keyboardType: keyboardType,
+        textCapitalization: TextCapitalization.words,
+        decoration: InputDecoration(
+          hintText: hint,
+          prefixIcon: Icon(icon, color: colorScheme.primary),
+          prefixText: prefixText,
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(vertical: 14),
+        ),
+      ),
+    );
+  }
+}
+
+class _TypeTile extends StatelessWidget {
+  const _TypeTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.selected,
+    required this.onTap,
+  });
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: selected
+              ? colorScheme.primaryContainer
+              : colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: selected
+                ? colorScheme.primary
+                : colorScheme.outlineVariant,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon,
+                size: 20,
+                color: selected
+                    ? colorScheme.onPrimaryContainer
+                    : colorScheme.onSurfaceVariant),
+            const SizedBox(height: 6),
+            Text(title,
+                style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: selected
+                        ? colorScheme.onPrimaryContainer
+                        : colorScheme.onSurface)),
+            Text(subtitle,
+                style: TextStyle(
+                    fontSize: 10,
+                    color: selected
+                        ? colorScheme.onPrimaryContainer
+                            .withValues(alpha: 0.7)
+                        : colorScheme.onSurfaceVariant)),
+          ],
+        ),
+      ),
+    );
   }
 }
 
 // ─── Shared widgets ──────────────────────────────────────────────────────────
 
 class _ShadowCard extends StatelessWidget {
-  const _ShadowCard({required this.children, this.padding});
+  const _ShadowCard({required this.children});
   final List<Widget> children;
-  final EdgeInsetsGeometry? padding;
 
   @override
   Widget build(BuildContext context) {
@@ -826,7 +1241,7 @@ class _ShadowCard extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
         child: Padding(
-          padding: padding ?? const EdgeInsets.symmetric(vertical: 4),
+          padding: const EdgeInsets.symmetric(vertical: 4),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: children,

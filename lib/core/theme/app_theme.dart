@@ -24,7 +24,7 @@ class AppTheme {
           primaryContainer: _darkGraySoft,
           onPrimaryContainer: _surfaceWhite,
           secondary: _accentOrange,
-          onSecondary: _textPrimary,
+          onSecondary: _surfaceWhite,
           surface: _surfaceWhite,
           onSurface: _textPrimary,
           onSurfaceVariant: _textSecondary,
