@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../controllers/main_controller.dart';
 import '../../core/routes/app_routes.dart';
 import '../../models/restaurant_model.dart';
+import '../../widgets/animated_list_item.dart';
 
 class RestaurantsTab extends GetView<MainController> {
   const RestaurantsTab({super.key});
@@ -104,13 +105,16 @@ class RestaurantsTab extends GetView<MainController> {
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: _RestaurantCard(
-                        restaurant: list[index],
-                        onTap: () => Get.toNamed<void>(
-                          AppRoutes.restaurantMenu,
-                          arguments: list[index],
+                    return AnimatedListItem(
+                      delay: Duration(milliseconds: 60 * index),
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: _RestaurantCard(
+                          restaurant: list[index],
+                          onTap: () => Get.toNamed<void>(
+                            AppRoutes.restaurantMenu,
+                            arguments: list[index],
+                          ),
                         ),
                       ),
                     );
@@ -171,29 +175,32 @@ class _RestaurantCard extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  bottomLeft: Radius.circular(20),
-                ),
-                child: SizedBox(
-                  width: 120,
-                  height: 120,
-                  child: CachedNetworkImage(
-                    imageUrl: restaurant.imageUrl,
-                    fit: BoxFit.cover,
-                    placeholder: (_, __) => Container(
-                      color: colorScheme.surfaceContainerHighest,
-                      child: const Center(
-                        child: CircularProgressIndicator(strokeWidth: 2),
+              Hero(
+                tag: 'restaurant-${restaurant.id}',
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    bottomLeft: Radius.circular(20),
+                  ),
+                  child: SizedBox(
+                    width: 120,
+                    height: 120,
+                    child: CachedNetworkImage(
+                      imageUrl: restaurant.imageUrl,
+                      fit: BoxFit.cover,
+                      placeholder: (_, __) => Container(
+                        color: colorScheme.surfaceContainerHighest,
+                        child: const Center(
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
                       ),
-                    ),
-                    errorWidget: (_, __, ___) => Container(
-                      color: colorScheme.surfaceContainerHighest,
-                      child: Icon(
-                        Icons.restaurant_rounded,
-                        size: 40,
-                        color: colorScheme.onSurfaceVariant,
+                      errorWidget: (_, __, ___) => Container(
+                        color: colorScheme.surfaceContainerHighest,
+                        child: Icon(
+                          Icons.restaurant_rounded,
+                          size: 40,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ),
                   ),

@@ -39,6 +39,7 @@ import '../../views/seller/seller_order_detail_view.dart';
 import '../../views/seller/seller_product_form_view.dart';
 import '../../views/seller/seller_edit_business_view.dart';
 import '../../views/driver/driver_main_view.dart';
+import '../../views/orders/order_detail_view.dart';
 import '../../controllers/seller_setup_controller.dart';
 import '../../controllers/seller_store_controller.dart';
 import '../../controllers/seller_category_controller.dart';
@@ -136,6 +137,10 @@ class AppPages {
           ),
         );
       }),
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.orderDetail,
+      page: OrderDetailView.new,
     ),
     GetPage<dynamic>(
       name: AppRoutes.checkout,

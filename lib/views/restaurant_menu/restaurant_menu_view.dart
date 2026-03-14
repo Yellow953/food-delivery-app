@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../controllers/restaurant_menu_controller.dart';
+import '../../core/routes/app_routes.dart';
 import '../../models/seller_product_model.dart';
-import '../../widgets/cart_icon_button.dart';
 
 class RestaurantMenuView extends GetView<RestaurantMenuController> {
   const RestaurantMenuView({super.key});
@@ -34,17 +34,29 @@ class RestaurantMenuView extends GetView<RestaurantMenuController> {
               restaurant.name,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w600,
+                color: Colors.white,
+                shadows: const [Shadow(color: Colors.black54, blurRadius: 6)],
               ),
             ),
             leading: _CircleNavButton(
               icon: Icons.arrow_back_rounded,
               onPressed: () => Get.back<void>(),
             ),
-            actions: const [CartIconButton()],
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: _CircleNavButton(
+                  icon: Icons.shopping_cart_outlined,
+                  onPressed: () => Get.toNamed<void>(AppRoutes.checkout),
+                ),
+              ),
+            ],
             flexibleSpace: FlexibleSpaceBar(
               collapseMode: CollapseMode.parallax,
               titlePadding: EdgeInsets.zero,
-              background: Stack(
+              background: Hero(
+                tag: 'restaurant-${restaurant.id}',
+                child: Stack(
                 fit: StackFit.expand,
                 children: [
                   CachedNetworkImage(
@@ -126,6 +138,7 @@ class RestaurantMenuView extends GetView<RestaurantMenuController> {
                     ),
                   ),
                 ],
+              ),
               ),
             ),
           ),

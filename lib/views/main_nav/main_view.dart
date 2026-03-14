@@ -15,20 +15,27 @@ class MainView extends GetView<MainController> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Obx(() {
-        switch (controller.currentIndex.value) {
-          case 0:
-            return const HomeTab();
-          case 1:
-            return const SearchTab();
-          case 2:
-            return const RestaurantsTab();
-          case 3:
-            return const OrdersTab();
-          case 4:
-            return const ProfileTab();
-          default:
-            return const HomeTab();
-        }
+        final idx = controller.currentIndex.value;
+        final pages = const [
+          HomeTab(),
+          SearchTab(),
+          RestaurantsTab(),
+          OrdersTab(),
+          ProfileTab(),
+        ];
+        return AnimatedSwitcher(
+          duration: const Duration(milliseconds: 220),
+          switchInCurve: Curves.easeOut,
+          switchOutCurve: Curves.easeIn,
+          transitionBuilder: (child, animation) => FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
+          child: KeyedSubtree(
+            key: ValueKey(idx),
+            child: pages[idx.clamp(0, pages.length - 1)],
+          ),
+        );
       }),
       bottomNavigationBar: Obx(
         () => Container(

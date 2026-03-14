@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../controllers/orders_controller.dart';
+import '../../core/routes/app_routes.dart';
 import '../../models/order_model.dart';
 
 class OrdersTab extends GetView<OrdersController> {
@@ -84,7 +85,8 @@ class OrdersTab extends GetView<OrdersController> {
                   }
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 12),
-                    child: _OrderCard(order: controller.orders[index]),
+                    child: _OrderCard(
+                        order: controller.orders[index]),
                   );
                 },
                 childCount: controller.orders.length,
@@ -142,7 +144,10 @@ class _OrderCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(20),
       elevation: 2,
       shadowColor: Colors.black12,
-      child: Padding(
+      child: InkWell(
+        onTap: () => Get.toNamed<void>(AppRoutes.orderDetail, arguments: order),
+        borderRadius: BorderRadius.circular(20),
+        child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -216,6 +221,7 @@ class _OrderCard extends StatelessWidget {
                   : 'Card',
             ),
           ],
+        ),
         ),
       ),
     );

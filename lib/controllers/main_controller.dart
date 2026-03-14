@@ -5,6 +5,7 @@ import '../models/banner_model.dart';
 import '../models/category_model.dart';
 import '../models/popular_dish_model.dart';
 import '../models/restaurant_model.dart';
+import '../models/search_product_result.dart';
 import '../services/auth_service.dart';
 import '../services/home_repository.dart';
 import 'cart_controller.dart';
@@ -22,11 +23,16 @@ class MainController extends GetxController {
   final RxList<PopularDishModel> popularDishes = <PopularDishModel>[].obs;
   final RxList<CategoryModel> categories = <CategoryModel>[].obs;
   final RxList<RestaurantModel> restaurants = <RestaurantModel>[].obs;
+  final RxList<SearchProductResult> allProducts = <SearchProductResult>[].obs;
   final RxBool homeDataLoading = true.obs;
   final RxBool restaurantsLoading = true.obs;
+  final RxBool allProductsLoading = false.obs;
 
   /// Favorite dish IDs (in-memory; could be persisted to Firestore/local later).
   final RxList<String> favoriteDishIds = <String>[].obs;
+
+  /// Selected category index on the home tab.
+  final RxInt selectedCategoryIndex = 0.obs;
 
   /// Search query for search tab (restaurants + dishes).
   final Rx<String> searchQuery = ''.obs;
@@ -58,7 +64,35 @@ class MainController extends GetxController {
         .toList();
   }
 
+  /// Filtered products (across all restaurants) by search query.
+  List<SearchProductResult> get filteredProducts {
+    final q = searchQuery.value.trim().toLowerCase();
+    if (q.isEmpty) return allProducts;
+    return allProducts
+        .where((r) =>
+            r.product.title.toLowerCase().contains(q) ||
+            r.product.description.toLowerCase().contains(q) ||
+            r.product.category.toLowerCase().contains(q) ||
+            r.restaurant.name.toLowerCase().contains(q))
+        .toList();
+  }
+
+  /// Filtered categories by search query.
+  List<CategoryModel> get filteredCategories {
+    final q = searchQuery.value.trim().toLowerCase();
+    if (q.isEmpty) return categories;
+    return categories
+        .where((c) => c.label.toLowerCase().contains(q))
+        .toList();
+  }
+
   void setSearchQuery(String value) => searchQuery.value = value;
+
+  void selectCategory(int index, String label) {
+    selectedCategoryIndex.value = index;
+    searchQuery.value = label;
+    setIndex(1); // navigate to Search tab
+  }
 
   void setIndex(int index) {
     currentIndex.value = index;
@@ -106,10 +140,24 @@ class MainController extends GetxController {
     restaurantsLoading.value = true;
     try {
       restaurants.assignAll(await _homeRepository!.getRestaurants());
+      _loadAllProducts();
     } catch (_) {
       // Keep empty list on error
     } finally {
       restaurantsLoading.value = false;
+    }
+  }
+
+  Future<void> _loadAllProducts() async {
+    if (_homeRepository == null || restaurants.isEmpty) return;
+    allProductsLoading.value = true;
+    try {
+      allProducts.assignAll(
+          await _homeRepository!.getAllProducts(restaurants));
+    } catch (_) {
+      // Keep empty list on error
+    } finally {
+      allProductsLoading.value = false;
     }
   }
 
